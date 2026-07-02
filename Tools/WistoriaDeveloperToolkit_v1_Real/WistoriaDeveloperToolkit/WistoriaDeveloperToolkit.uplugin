@@ -1,0 +1,20 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0.0",
+  "FriendlyName": "Wistoria Developer Toolkit",
+  "Description": "Editor tools for building and validating Wand and Wistoria gameplay content.",
+  "Category": "Wistoria",
+  "CreatedBy": "Wand and Wistoria Team",
+  "CanContainContent": false,
+  "IsBetaVersion": true,
+  "IsExperimentalVersion": false,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "WistoriaDeveloperToolkit",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ]
+}

@@ -20,6 +20,14 @@ Install these in Visual Studio Installer before packaging:
 
 After installing, close Unreal and Visual Studio, then regenerate project files from `MyProject.uproject`.
 
+For repeatable local builds, use:
+
+```powershell
+.\Tools\BuildWistoriaEditor.ps1
+```
+
+If Live Coding is active, close Unreal Editor or press `Ctrl+Alt+F11` in the editor before running the script.
+
 ## Packaging Settings
 
 Open Unreal Engine:
@@ -51,6 +59,12 @@ From the editor:
 4. Use a clean output directory such as `C:\WistoriaRPG_Builds`.
 
 Command-line packaging can be added after the SDK is installed, but editor packaging is the best first pass because it shows missing assets and maps clearly.
+
+After the title map and required gameplay maps are assigned in Project Settings, command-line packaging can use:
+
+```powershell
+.\Tools\PackageWistoriaWindows.ps1 -OutputDirectory "C:\WistoriaRPG_Builds"
+```
 
 ## Save Slot Title Screen
 

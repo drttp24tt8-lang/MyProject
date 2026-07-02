@@ -1,8 +1,8 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "{36348F98-4CC9-E428-A1A2-E4A2770A8E51}",
-	"Category": "",
-	"Description": "",
+	"EngineAssociation": "5.8",
+	"Category": "Games",
+	"Description": "Wand and Wistoria single-player action RPG beta project.",
 	"Modules": [
 		{
 			"Name": "MyProject",
@@ -12,30 +12,11 @@
 	],
 	"Plugins": [
 		{
-			"Name": "ModelingToolsEditorMode",
-			"Enabled": true,
-			"TargetAllowList": [
-				"Editor"
-			]
-		},
-		{
-			"Name": "Landmass",
+			"Name": "EnhancedInput",
 			"Enabled": true
 		},
 		{
-			"Name": "InEditorDocumentation",
-			"Enabled": true,
-			"TargetAllowList": [
-				"Editor"
-			],
-			"PlatformAllowList": [
-				"Win64",
-				"Mac",
-				"Linux"
-			]
-		},
-		{
-			"Name": "AIAssistant",
+			"Name": "Niagara",
 			"Enabled": true
 		}
 	]

@@ -1,0 +1,19 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0.0",
+  "FriendlyName": "Wistoria Developer Toolkit",
+  "Description": "Internal editor toolkit for building Wand and Wistoria gameplay assets, folders, test levels, and diagnostics.",
+  "Category": "Wistoria",
+  "CreatedBy": "AJ Touring / ChatGPT",
+  "CanContainContent": false,
+  "IsBetaVersion": true,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "WistoriaDeveloperToolkit",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ]
+}

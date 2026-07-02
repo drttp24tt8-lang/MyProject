@@ -15,6 +15,7 @@ This project is being converted from the First Person Blueprint template into a 
 - Spell projectiles can now use `FWistoriaSpellDataRow` status metadata: `StatusToApply`, `StatusDuration`, and `StatusChance`.
 - `UWistoriaStatusComponent`: status-effect container with corruption miasma support.
 - `AMiasmaCrystalNode`: interactable dungeon crystal that clears miasma and can drive companion/objective gameplay.
+- `AMiasmaHazardVolume`: trigger volume for Corrupted Abyss rooms that applies miasma, optionally clears it on exit, and can be disabled when a crystal is cleansed.
 - `AWorldLootPickup`: world item/gold pickup actor with overlap collection, manual interaction, sound, and Niagara VFX hooks.
 - `ATreasureChest`: interactable one-time reward chest for exploration loot, crafting materials, weapons, and gold; optional `ChestId` persistence uses save story flags.
 - `ASavePoint`: interactable rest/checkpoint actor that restores resources, saves progression, and stores respawn location/rotation.
@@ -23,6 +24,7 @@ This project is being converted from the First Person Blueprint template into a 
 - `AWistoriaRaidGameMode`: end-game raid referee for active wave, alive enemies, max waves, inter-wave delay, final boss wave, raid score, victory, and failure.
 - `ARaidSpawnManager`: raid arena spawner that starts raid instances and spawns scaled enemy waves from local offsets or explicit world spawn locations.
 - Raid and dungeon wave scaling now reads the player's actual active NPC companion count at runtime, increasing enemy count and enemy stat multipliers for larger AI squads.
+- New Game Plus loops reset story/quest progress while retaining level, inventory, weapon logs, gold, skill tree, companion bonds, fast travel, and unlocked cosmetic/rank data. Raid waves scale health, damage, and enemy count from the active NG+ loop count.
 - The project is single-player only; dungeon and raid party support comes from NPC companions rather than networked players.
 - `ACompanionAIController`: single-player companion controller that follows the player and switches to enemy support behavior during dungeon/raid combat.
 - `ACompanionPartySpawner`: dungeon/raid entrance actor that spawns a capped NPC party and lets companions auto-register with the player.
@@ -53,6 +55,8 @@ This project is being converted from the First Person Blueprint template into a 
 - `UWistoriaSaveLibrary` also exposes three title-screen save slots: `WistoriaSlot_1`, `WistoriaSlot_2`, and `WistoriaSlot_3`, with Blueprint-readable slot summaries for level, gold, NG+, raid clears, and academy rank.
 - `UWistoriaGameInstance` stores active save-slot and pending New Game Plus state across map loads.
 - `AWistoriaPlayerController` creates HUD and pause widgets and handles Escape pause toggling.
+- `AWistoriaTitleGameMode` and `AWistoriaTitlePlayerController` provide a title-screen flow that automatically opens the save-slot widget and uses UI-only input.
+- `AWistoriaBetaTestProbe` is a drop-in actor for beta maps that prints smoke-test results for player class, game instance, save slots, and assigned weapon/spell Data Table row counts.
 - `UWistoriaUIWidgets` provides C++ parent widgets for HUD, pause, inventory, quests, skills, boss health, raid HUD, dialogue, shop, fast travel, companion command, character creator, and save-slot manager screens.
 - `AWistoriaCharacter` can spawn a Niagara Courage burst effect when Will-style combat spends `80` Courage through `CastActiveSpell`.
 - `AWistoriaCharacter` supports Enhanced Input assets through `DefaultMappingContext`, `MoveAction`, `LookAction`, `JumpAction`, `AttackAction`, `CastSpellAction`, `InteractAction`, `LockOnAction`, `ParryAction`, and `DodgeAction`, while retaining legacy fallback mappings.
@@ -63,10 +67,19 @@ This project is being converted from the First Person Blueprint template into a 
 - `DataSeeds/DT_CraftingRecipes.csv` contains 120 generated blacksmith recipes for import into a Crafting Recipe Data Table.
 - `Tools/GenerateWistoriaDataSeeds.ps1` regenerates those CSV logs on demand.
 - `Tools/CleanUnrealGeneratedFiles.ps1` safely removes generated Unreal build folders after closing Unreal/Visual Studio. Run with `-WhatIf` first.
+- `Tools/BuildWistoriaEditor.ps1` runs a repeatable editor build and detects active Live Coding before invoking UnrealBuildTool.
+- `Tools/PackageWistoriaWindows.ps1` runs a Windows BuildCookRun package after maps/assets are ready.
+- `Tools/CreateBetaProjectZip.ps1` creates a clean beta handoff archive with source, config, content, docs, data seeds, and tools while excluding generated build/cache folders.
+- `Tools/ValidateBetaProject.ps1` checks that the project and beta archive contain the required load/build/test files.
+- `Tools/ValidateDataSeeds.ps1` checks that the generated data libraries contain 1,000 weapons, 500 spells, and 120 crafting recipes with required columns.
+- `Tools/PrepareBetaRelease.ps1` runs data validation, archive creation, archive validation, and optionally an editor build with `-Build`.
+- `Tools/RunWistoriaAutomationTests.ps1` runs the `WandAndWistoria.Core` automation tests headlessly after the project is built.
+- `BETA_TEST_README.md` is the short load/test guide for beta testers.
 - `MISSION_01_THE_FIRST_DESCENT.md` contains the first playable campaign mission, dialogue script, level layout, quest objectives, and test checklist.
 - `NIAGARA_WILL_ULTIMATE_AURA_BLAST.md` contains the three-layer Courage/Wis ultimate Niagara setup for ribbon burst, ground crack radial expansion, and body aura mesh glow.
 - `PACKAGING_AND_KEYBINDING.md` contains the final Windows packaging checklist and Enhanced Input keybinding menu plan.
 - `WORLD_PARTITION_OPTIMIZATION.md` contains the cell sizing, HLOD, foliage, fast travel, and raid-map optimization pass.
+- `DUNGEON_LAYER_02_CORRUPTED_ABYSS.md` contains the Floor 4 corrupted miasma layer plan, hazard rules, crystal cleanse flow, and encounter checklist.
 
 ## Required Local Tooling Before Compile
 
@@ -168,9 +181,12 @@ The C++ side already contains the core classes from the original prototype roadm
     For an empty row, show New Game and call `StartNewGameInSlot(SlotIndex)`, then `OpenGameplayLevel`.
     For a filled row, show Load Game and call `LoadGameInSlot(SlotIndex)`, then `OpenGameplayLevel`.
     Optional delete buttons can call `DeleteSaveSlot(SlotIndex)` and refresh the rows.
-35. Create `NS_Will_CourageAuraBlast` using `NIAGARA_WILL_ULTIMATE_AURA_BLAST.md`, assign it to `BP_WistoriaCharacter.CourageBurstEffect`, and test by spending `80` Courage.
-36. Build the title screen map with `WBP_SaveSlotManager`, then follow `PACKAGING_AND_KEYBINDING.md` for Shipping packaging and the custom keybinding menu.
-37. Use `WORLD_PARTITION_OPTIMIZATION.md` for the open-world streaming/HLOD pass after Mission 01 and the raid arena are playable.
+35. Create `BP_WistoriaTitlePlayerController` from `AWistoriaTitlePlayerController`, assign `WBP_SaveSlotManager` to `SaveSlotWidgetClass`, and use `AWistoriaTitleGameMode` or a Blueprint child as the title map's GameMode override.
+36. Create `NS_Will_CourageAuraBlast` using `NIAGARA_WILL_ULTIMATE_AURA_BLAST.md`, assign it to `BP_WistoriaCharacter.CourageBurstEffect`, and test by spending `80` Courage.
+37. Build the title screen map with `WBP_SaveSlotManager`, then follow `PACKAGING_AND_KEYBINDING.md` for Shipping packaging and the custom keybinding menu.
+38. Use `WORLD_PARTITION_OPTIMIZATION.md` for the open-world streaming/HLOD pass after Mission 01 and the raid arena are playable.
+39. Build Floor 4 from `DUNGEON_LAYER_02_CORRUPTED_ABYSS.md` using `BP_MiasmaHazardVolume` and `BP_MiasmaCrystalNode`.
+40. Create `BP_WistoriaBetaTestProbe`, place it in beta maps, and assign imported Weapon/Spell Data Tables so smoke checks appear in Play mode.
 
 ## Next Gameplay Milestones
 
